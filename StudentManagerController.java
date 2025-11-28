@@ -18,8 +18,13 @@ public class StudentManagerController {
     }
 
     public void nameInput(Student st1) {
+        String NAME_PATTERN = "^[a-zA-Z\\s]+$";
         System.out.println("Nhap ho va ten cua sinh vien: ");
         st1.setName(sc.nextLine());
+        while (Pattern.matches(NAME_PATTERN,st1.getName()) == false) {
+            System.out.println("Sai dinh dang ten! Xin hay nhap lai!");
+            st1.setName(sc.nextLine());
+        }
     }
 
     public void birthInput(Student st1) {
