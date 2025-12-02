@@ -7,6 +7,13 @@ public class Student {
     public Student () {
     }
 
+    public Student (String studentId, String name, String birth, String tel) {
+        this.studentId = studentId;
+        this.name = name;
+        this.birth = birth;
+        this.tel = tel;
+    }
+
     public String getId() {
         return studentId;
     }
@@ -50,5 +57,10 @@ public class Student {
     @Override
     public int hashCode() {
         return studentId == null ? 0: studentId.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "Ma so sinh vien: " + studentId + " - " + "Ho va ten: " + name + " - " + "Ngay sinh: " + birth + " - " + "So dien thoai: " + tel;
     }
 }

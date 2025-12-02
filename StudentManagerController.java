@@ -1,112 +1,210 @@
 import java.util.Scanner;
-import java.util.regex.Pattern;
-
 public class StudentManagerController {
-    StudentManager sm = new StudentManager();
-    Scanner sc = new Scanner(System.in);
-    public StudentManagerController() {
+    private Scanner sc;
+    StudentManager sm = new StudentManager(sc);
+    StudentManagerView view = new StudentManagerView();
+    public StudentManagerController(Scanner sc) {
+        this.sc = sc;
+        this.sm = new StudentManager(sc);
     }
 
-    public void idInput(Student st1) {
-        System.out.println("Nhap ma so sinh vien(SV + So co 3 chu so): ");
-        String ID_PATTERN = "^SV\\d{3,4}$";
-        st1.setId(sc.nextLine());
-        while (Pattern.matches(ID_PATTERN,st1.getId()) == false) {
-            System.out.println("Sai dinh dang ma so sinh vien! Xin hay nhap lai: ");
-            st1.setId(sc.nextLine());
-        }
-    }
-
-    public void nameInput(Student st1) {
-        String NAME_PATTERN = "^[a-zA-Z\\s]+$";
-        System.out.println("Nhap ho va ten cua sinh vien: ");
-        st1.setName(sc.nextLine());
-        while (Pattern.matches(NAME_PATTERN,st1.getName()) == false) {
-            System.out.println("Sai dinh dang ten! Xin hay nhap lai!");
-            st1.setName(sc.nextLine());
-        }
-    }
-
-    public void birthInput(Student st1) {
-        System.out.println("Nhap ngay sinh cua sinh vien: ");
-        String DATE_PATTERN= "^\\d{1,2}[\\/|-]\\d{1,2}[\\/|-]\\d{4}$";
-        st1.setBirth(sc.nextLine());
-        while(Pattern.matches(DATE_PATTERN,st1.getBirth()) == false) {
-            System.out.println("Sai dinh dang ngay! Xin hay nhap lai: ");
-            st1.setBirth(sc.nextLine());
-        }
-    }
-
-    public void telInput(Student st1) {
-        System.out.println("Nhap so dien thoai cua sinh vien: ");
-        st1.setTel(sc.nextLine());
-        while (st1.getTel().length()<10 || st1.getTel().length()>11 || st1.getTel().charAt(0)!='0') {
-            System.out.println("Sai dinh dang so dien thoai! Xin hay nhap lai: ");
-            st1.setTel(sc.nextLine());
-        }
-    }
-
-    public void getUserInfo() {
-        Student st1 = new Student();
-        idInput(st1);
-        nameInput(st1);
-        birthInput(st1);
-        telInput(st1);
+    public void addStudent() {
+        String id;
         while (true) {
-            if (sm.getST().contains(st1)) {
-                System.out.println("Ma so sinh vien da ton tai! Xin hay nhap lai!");
-                idInput(st1);
-                nameInput(st1);
-                birthInput(st1);
-                telInput(st1);      
+            id = view.getInput("Nhap ma so sinh vien (Vi du: SV001, SV123, SV0001): ");
+
+            if (sm.findById(id)!=null) {
+                view.showMessage("Ma so sinh vien da ton tai! Xin hay nhap lai");
+                continue;
             }
-            else {
-                sm.getST().add(st1);
-                System.out.println("Ma so sinh vien chua ton tai! Da them sinh vien!");
+
+            if (!sm.idValid(id)) {
+                view.showMessage("Sai dinh dang ma so sinh vien! Xin hay nhap lai!");
+                continue;
+            }
+
+            break;
+        }
+
+        String name;
+        while (true) { 
+            name = view.getInput("Nhap ho va ten: ");
+
+            if (!sm.nameValid(name)) {
+                view.showMessage("Sai dinh dang ho va ten! Xin hay nhap lai!");
+                continue;
+            }
+
+            break;
+        }
+
+        String birth;
+        while (true) {
+            birth = view.getInput("Nhap ngay sinh (dd/mm/yyyy): ");
+
+            if (!sm.birthValid(birth)) {
+                view.showMessage("Sai dinh dang ngay sinh! Xin hay nhap lai!");
+                continue;
+            }
+            break;
+        }
+
+        String tel;
+        while (true) {  
+            tel = view.getInput("Nhap so dien thoai: ");
+
+            if (!sm.telValid(tel)) {
+                view.showMessage("Sai dinh dang so dien thoai! Xin hay nhap lai!");
+                continue;
+            }
+            break;
+        }
+
+        Student student = new Student(id,name,birth,tel);
+        sm.addStudent(student);
+        view.showSuccess("Them thanh cong!");
+    }
+
+    public void changeStudent() {
+        String id = view.getInput("Nhap ma so sinh vien de tim kiem: ");
+        Student st = sm.findById(id);
+        if (st == null) {
+            System.out.println("Sinh vien khong ton tai");
+            return;
+        }
+        view.showChangeMenu();
+        int s1 = view.getIntInput("Chon thong tin de thay doi: ");
+        switch (s1) {
+            case 1:
+                String newName = view.getInput("Nhap ten de thay doi");
+                st.setName(newName);
+                view.showSuccess("Thay doi ten thanh cong");
                 break;
-            }
+            case 2:
+                String newBirth = view.getInput("Nhap ngay sinh de thay doi");
+                st.setBirth(newBirth);
+                break;
+            case 3:
+                String newTel = view.getInput("Nhap so dien thoai de thay doi");
+                st.setTel(newTel);
+                break;
+            case 4:
+                return;
+            default:
+                view.showError("Lua chon khong ton tai");
+                return;
         }
     }
 
-    public void checkInfoById() {
-        while (true) {
-            System.out.println("Hay nhap ma so sinh vien de tra cuu thong tin: ");
-            Student st1 = new Student();
-            st1.setId(sc.nextLine());
-            boolean found = false;
-            for (int i=0;i<sm.getST().size();i++) {
-                if (sm.getST().get(i).getId().equals(st1.getId())) {
-                    System.out.println("Ma so sinh vien: "+ sm.getST().get(i).getId() + "-" + " Ho va ten: " + sm.getST().get(i).getName() + "-" + " Ngay sinh: " + sm.getST().get(i).getBirth() + "-" + "So dien thoai: " + sm.getST().get(i).getTel());
-                    found = true;
-                    break;
+    public void findStudent() {
+        view.showFindMenu();
+       
+        int selection = view.getIntInput("Nhap lua chon: ");
+
+        switch (selection) {
+            case 1:
+                String id = view.getInput("Nhap ma so sinh vien cua sinh vien can tim kiem (Vi du: SV001, SV123, SV0001): ");
+                Student found1 = sm.findById(id);
+                if (found1 != null) {
+                    view.showSuccess("Da tim thay sinh vien: " + found1);
+                } else {
+                    view.showError("Sinh vien khong ton tai!");
+                    return;
                 }
-            }
-
-            if (found) {
                 break;
-            } else {
-                System.out.println("Ma so sinh vien khong ton tai! Xin hay nhap lai!");
-            }
+            case 2:
+                String name = view.getInput("Nhap ten hoac 1 phan ten cua sinh vien can tim kiem (Vi du: Tim Tran Huy thi co the nhap Tran hoac Huy hoac Tran Huy): ");
+                if (!sm.findByName(name).isEmpty()) {
+                    view.showSuccess("Da tim thay sinh vien: " + sm.findByName(name));
+                } else {
+                    view.showError("Sinh vien khong ton tai!");
+                    return;
+                }
+                break;
+            case 3:
+                String year = view.getInput("Nhap nam cua sinh vien can tim kiem (Vi du: 1990, 2000, 2023): ");
+                if (!sm.findByYear(year).isEmpty()) {
+                    view.showSuccess("Da tim thay sinh vien: " + sm.findByYear(year));
+                } else {
+                    view.showError("Sinh vien khong ton tai!");
+                    return;
+                }
+                break;
+            case 4:
+                return;
+            default:
+                view.showError("Lua chon khong ton tai");
         }
     }
 
-    public void deleteById() {
-        while (true) {
-            System.out.println("Hay nhap ma so sinh vien can xoa: ");
-            Student st1 = new Student();
-            boolean found = false;
-            for (int i=0;i<sm.getST().size();i++) {
-                if (sm.getST().get(i).getId().equals(st1.getId())) {
-                    sm.getST().remove(i);
-                    found = true;
-                    break;
-                }
-            }
+    public void deleteStudent() {
+        String id = view.getInput("Nhap ma so sinh vien cua sinh vien can xoa: ");
 
-            if (found) {
-                break;
-            } else {
-                System.out.println("Ma so sinh vien khong ton tai! Xin hay nhap lai!");
+        if (sm.deleteById(id)) {
+            view.showSuccess("Xoa thanh cong!");
+        } else {
+            view.showError("Xoa khong thanh cong!");
+        }
+    }
+
+    public void showAllStudent() {
+        view.showAllStudent(sm.getST());
+    }
+
+    public void run() {
+        while (true) {
+            view.showMainMenu();
+            int selection = view.getIntInput("Nhap lua chon: ");
+            switch (selection) {
+                case 1:
+                    while (true) {
+                        addStudent();
+                        if (view.askContinue("Nhap")) {
+                            continue;
+                        } else {
+                            break;
+                        }
+                    }
+                    break;
+                case 2:
+                    while (true) {
+                        findStudent();
+                        if (view.askContinue("Tim")) {
+                            continue;
+                        } else {
+                            break;
+                        }
+                    }
+                    break;
+                case 3:
+                    while (true) {
+                        deleteStudent();
+                        if (view.askContinue("Xoa")) {
+                            continue;
+                        } else {
+                            break;
+                        }
+                    }
+                    break;
+                case 4:
+                    while (true) {
+                        changeStudent();
+                        if (view.askContinue("Thay doi")) {
+                            continue;
+                        } else {
+                            break;
+                        }
+                    }
+                    break;
+                case 5:
+                    showAllStudent();
+                    break;
+                case 6:
+                    view.showMessage("Thoat chuong trinh");
+                    return;
+                default:
+                    view.showError("Lua chon khong ton tai! Xin hay nhap lai!");
+                    continue;
             }
         }
     }

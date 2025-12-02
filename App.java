@@ -1,7 +1,11 @@
+import java.util.Scanner;
+
 public class App {
     public static void main(String[] args) {
-        StudentManagerController smc = new StudentManagerController();
-        StudentManagerView smv = new StudentManagerView(smc);
-        smv.menu();
+        Scanner scanner = new Scanner(System.in);
+        StudentManagerController smc = new StudentManagerController(scanner);
+        StudentManagerView smv = new StudentManagerView();
+        StudentManager sm = new StudentManager(scanner);
+        smc.run();
     }
 }
